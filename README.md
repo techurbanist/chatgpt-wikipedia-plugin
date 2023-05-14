@@ -26,13 +26,13 @@ npm install wrangler
 
 Run `./run-develop.sh` to test locally.
 
-Call the development API using the API described in the `.well-known/openai.yaml`. For example:
-http://127.0.0.1:8788/query/Cessna 152/["cruise speed","maximum speed"]
+Call your local development API like this:
+`http://127.0.0.1:8788/query/Cessna 152/["cruise speed","speed"]`
 
 
 ## Deployment
 
-You must set a `CLOUDFLARE_ACCOUNT_ID` env variable to deploy the function.
+You must set a `CLOUDFLARE_ACCOUNT_ID` env variable to deploy the function using the shell script.
 
 Run `./deploy-static.sh` to deploy the CloudFlare Pages project.
 
