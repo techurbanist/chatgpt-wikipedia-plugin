@@ -1,0 +1,42 @@
+openapi: 3.0.1
+info:
+  title: Wikipedia 
+  description: Get snippets of content from Wikipedia by searching for specific terms within a Wikipedia page.
+  version: 'v1'
+servers:
+  - url: https://chatgpt-wikipedia-plugin.cloudmesh.me
+paths:
+  /query/{page}/{searchTerms}:
+    get:
+      operationId: getQueryResults
+      summary: Get paragraphs containing the search terms from a Wikipedia page.
+      parameters:
+        - name: page
+          in: path
+          required: true
+          description: The title of a Wikipedia page containing the information you want. Must be in title case (e.g. "2022 Booker Prize").
+          schema:
+            type: string
+        - name: searchTerms
+          in: path
+          required: true
+          description: The search terms likely to match relevant content on the page, as a stringified JSON array (e.g. "[\"cruise speed\"]") with max 4 elements.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getQueryResultsResponse'
+components:
+  schemas:
+    getQueryResultsResponse:
+      type: object
+      properties:
+        matches:
+          type: array
+          items:
+            type: string
+          description: An array of paragraphs that match the search terms.
