@@ -1,1 +1,0 @@
-npx wrangler pages publish ./ --project-name="chatgpt-wikipedia-plugin"

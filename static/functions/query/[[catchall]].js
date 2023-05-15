@@ -1,4 +1,4 @@
-import {Index} from '../../src/flexsearch.js'
+import {Index} from '../../lib/flexsearch.js'
 
 const RETURN_PARAGRAPH_LIMIT = 5; 
 const SEARCH_RESULTS_LIMIT = 10; 
@@ -6,7 +6,25 @@ const MAX_SEARCH_TERMS = 4; // Max number of search terms to allow
 const PARAGRAPH_CHAR_LIMIT = 500;  // If a paragraph is longer than this, split it into multiple paragraphs
 const LOGGING = false;
 
+/*
+ * Request handler for Cloudflare Pages Functions
+ */
 export async function onRequest(context) {
+  const {decodedTopic, decodedQueries} = extractArgs(context);
+  const pageText = await fetchWikipediaPage(decodedTopic);
+  const paragraphs = splitPageToParagraphs(pageText);
+  const index = getSearchIndex(paragraphs);
+  const matchingParagraphs = getMatchingParagraphs(paragraphs, index, decodedQueries);
+
+  return new Response(JSON.stringify({matches: matchingParagraphs}), {
+    headers: {
+      "content-type": "application/json;charset=UTF-8",
+    }
+  });
+}
+
+
+export function extractArgs(context) {
   let topic, query;
   try {
     ({ catchall: [topic, query] } = context.params);
@@ -41,7 +59,12 @@ export async function onRequest(context) {
   }
 
   if(LOGGING) console.log(`Searching for ${decodedQuery} in ${decodedTopic}`);
+  
+  return {decodedTopic, decodedQueries};
+}
 
+
+export async function fetchWikipediaPage(decodedTopic){
   let response, data;
   try {
     response = await fetch(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&explaintext&redirects=1&titles=${decodedTopic}`);
@@ -57,8 +80,11 @@ export async function onRequest(context) {
   if (pageText === undefined) {
     return new Response("Page not found on Wikipedia", {status: 404, statusText: "Page not found" });
   }
+  return pageText;
+}
 
-  // Break down the page into paragraphs
+
+export function splitPageToParagraphs(pageText){
   let paragraphs = pageText.split('\n\n').flatMap(para => {
     if (para.length > PARAGRAPH_CHAR_LIMIT) {
       return para.split('\n'); 
@@ -66,20 +92,28 @@ export async function onRequest(context) {
       return para;
     }
   });
+  return paragraphs;
+}
 
-  // Index the paragraphs
+
+export function getSearchIndex(paragraphs){
   const options = {
-        charset: "latin",
-        tokenize: 'forward',
-        preset: "default",
-        minlength: 3,
-    }
+    charset: "latin",
+    tokenize: 'forward',
+    preset: "default",
+    minlength: 3,
+  }
   const index = new Index(options);
 
   paragraphs.forEach((paragraph, i) => {
     index.add(i, paragraph);
   });
 
+  return index;
+}
+
+
+export function getMatchingParagraphs(paragraphs, index, decodedQueries){
   // Search the index for each query term, aggregate results
   const matchCounts = {}; 
   decodedQueries.forEach(decodedQuery => {
@@ -100,10 +134,5 @@ export async function onRequest(context) {
   // Filter the paragraphs to only those that match
   const matchingParagraphs = sortedMatches.map(match => paragraphs[match]);
 
-  return new Response(JSON.stringify({matches: matchingParagraphs}), {
-    headers: {
-      "content-type": "application/json;charset=UTF-8",
-    }
-  });
-
+  return matchingParagraphs;
 }

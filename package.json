@@ -1,0 +1,18 @@
+{
+    "name": "chatgpt-wikipedia-plugin",
+    "version": "1.0.0",
+    "description": "Get up-to-date information about a topic from Wikipedia",
+    "scripts": {
+        "test": "jest",
+        "develop": "cd static && wrangler pages dev ./ --compatibility-flags='nodejs_compat' --compatibility-date=2023-05-13",
+        "publish": "cd static && wrangler pages publish ./ --project-name='chatgpt-wikipedia-plugin'"
+    },
+    "author": "Techurbanist",
+    "license": "MIT",
+    "devDependencies": {
+        "@babel/core": "^7.21.8",
+        "@babel/preset-env": "^7.21.5",
+        "jest": "29.5.0",
+        "wrangler": "2.20.0"
+    }
+}

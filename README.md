@@ -2,6 +2,8 @@
 
 A plugin for ChatGPT which fetches the latest information on a specific topic from Wikipedia. 
 
+The plugin will retrieve the Wikipedia page by title, index the content on the page for full text search and then return the top n paragraphs that match the search terms.
+
 The plugin consists of:
 * The plugin manifest and OpenAPI spec as required for all ChatGPT plugins
 * A static `legal.html` webpage referenced in the plugin manifest  
@@ -14,7 +16,6 @@ https://example.com/query/[page_title]/["search","terms"]
 ```
 Where the `page_title` is the Wikipedia page title and the `search terms` are the words to find in the Wikipedia page.
 
-The plugin will retrieve the Wikipedia page by title, index the content on the page for full text search and then return the top n paragraphs that match the search terms.
 
 ## Development
 
@@ -24,17 +25,26 @@ Use [CloudFlare Wrangler](https://developers.cloudflare.com/workers/wrangler/ins
 npm install wrangler
 ```
 
-Run `./run-develop.sh` to test locally.
+To develop the CloudFlare Function locally:
+```bash
+npm run develop
+``` 
 
 Call your local development API like this:
 `http://127.0.0.1:8788/query/Cessna 152/["cruise speed","speed"]`
+
+
+Run unit tests:
+```bash
+npm run test
+```
 
 
 ## Deployment
 
 You must set a `CLOUDFLARE_ACCOUNT_ID` env variable to deploy the function using the shell script.
 
-Run `./deploy-static.sh` to deploy the CloudFlare Pages project.
+Run `npm run publish` to deploy the CloudFlare Pages project.
 
 ## Contributing
 
