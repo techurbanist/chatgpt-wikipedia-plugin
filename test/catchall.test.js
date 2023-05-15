@@ -1,7 +1,4 @@
 import * as MUT from '../static/functions/query/[[catchall]].js';
-import { Index } from '../static/lib/flexsearch.js';
-
-jest.mock('../static/lib/flexsearch.js');
 
 describe('[[catchall]].js', () => {
   describe('extractArgs', () => {
@@ -54,22 +51,12 @@ describe('[[catchall]].js', () => {
     });
   });
 
-  describe('getSearchIndex', () => {
-    it('should get search index', () => {
-      const paragraphs = ['paragraph1', 'paragraph2', 'paragraph3'];
-      const index = MUT.getSearchIndex(paragraphs);
-      expect(index).toBeInstanceOf(Index);
-    });
-  });
-
   describe('getMatchingParagraphs', () => {
-    it('should get matching paragraphs', () => {
-      const paragraphs = ['paragraph1', 'paragraph2', 'paragraph3'];
-      const index = new Index();
-      index.search = jest.fn(() => [0, 1, 2]);
-      const decodedQueries = ['query1', 'query2'];
-      const result = MUT.getMatchingParagraphs(paragraphs, index, decodedQueries);
-      expect(result).toEqual(['paragraph1', 'paragraph2', 'paragraph3']);
+    it('should get matching paragraphs sorted', () => {
+      const paragraphs = ['paragraph0','paragraph1 term1', 'paragraph2 term1 term2', 'paragraph3', 'paragraph4'];
+      const decodedQueries = ['term1', 'term2'];
+      const result = MUT.getMatchingParagraphs(paragraphs, decodedQueries);
+      expect(result).toEqual(['paragraph2 term1 term2', 'paragraph1 term1', 'paragraph0']);
     });
   });
 });

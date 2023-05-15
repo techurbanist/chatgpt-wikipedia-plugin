@@ -1,7 +1,4 @@
-import {Index} from '../../lib/flexsearch.js'
-
 const RETURN_PARAGRAPH_LIMIT = 5; 
-const SEARCH_RESULTS_LIMIT = 10; 
 const MAX_SEARCH_TERMS = 4; // Max number of search terms to allow
 const PARAGRAPH_CHAR_LIMIT = 500;  // If a paragraph is longer than this, split it into multiple paragraphs
 const LOGGING = false;
@@ -13,8 +10,7 @@ export async function onRequest(context) {
   const {decodedTopic, decodedQueries} = extractArgs(context);
   const pageText = await fetchWikipediaPage(decodedTopic);
   const paragraphs = splitPageToParagraphs(pageText);
-  const index = getSearchIndex(paragraphs);
-  const matchingParagraphs = getMatchingParagraphs(paragraphs, index, decodedQueries);
+  const matchingParagraphs = getMatchingParagraphs(paragraphs, decodedQueries);
 
   return new Response(JSON.stringify({matches: matchingParagraphs}), {
     headers: {
@@ -96,43 +92,42 @@ export function splitPageToParagraphs(pageText){
 }
 
 
-export function getSearchIndex(paragraphs){
-  const options = {
-    charset: "latin",
-    tokenize: 'forward',
-    preset: "default",
-    minlength: 3,
-  }
-  const index = new Index(options);
-
-  paragraphs.forEach((paragraph, i) => {
-    index.add(i, paragraph);
-  });
-
-  return index;
-}
-
-
-export function getMatchingParagraphs(paragraphs, index, decodedQueries){
-  // Search the index for each query term, aggregate results
-  const matchCounts = {}; 
-  decodedQueries.forEach(decodedQuery => {
-    const matches = index.search(decodedQuery, SEARCH_RESULTS_LIMIT);
-    matchCounts[0] = 1; // Always include the first paragraph
-    matches.forEach(match => {
-      if (matchCounts[match] === undefined) {
-        matchCounts[match] = 1;
-      } else {
-        matchCounts[match]++;
+export function getMatchingParagraphs(paragraphs, decodedQueries) {
+  // Map paragraphs to objects that include the paragraph and its count
+  const paragraphsAndCounts = paragraphs.map((paragraph, index) => {
+    let count = 0;
+    decodedQueries.forEach(query => {
+      // Split query into words
+      const words = query.split(' ');
+      words.forEach(word => {
+        const regex = new RegExp('\\b' + word + '\\b', 'gi');
+        const matches = paragraph.match(regex);
+        if (matches) {
+          count += matches.length;
+        }
+      });
+      // If the entire query matches, give a higher rating
+      const queryRegex = new RegExp('\\b' + query, 'gi');
+      const queryMatches = paragraph.match(queryRegex);
+      if (queryMatches) {
+        count += queryMatches.length;
       }
     });
+    return { paragraph, count };
   });
 
-  // Sort matches by count, then take top n
-  const sortedMatches = Object.keys(matchCounts).sort((a, b) => matchCounts[b] - matchCounts[a]).slice(0, RETURN_PARAGRAPH_LIMIT);
+  // Sort and filter the paragraphs by count
+  const matchingParagraphs = paragraphsAndCounts
+    .sort((a, b) => b.count - a.count)
+    .filter(({ count }) => count > 0)
+    .slice(0, RETURN_PARAGRAPH_LIMIT)
+    .map(({ paragraph }) => paragraph);
 
-  // Filter the paragraphs to only those that match
-  const matchingParagraphs = sortedMatches.map(match => paragraphs[match]);
+  // add the first para for context if results are limited
+  if(matchingParagraphs.length < RETURN_PARAGRAPH_LIMIT) {
+    matchingParagraphs.push(paragraphs[0])
+  }
 
   return matchingParagraphs;
 }
+

@@ -7,7 +7,7 @@
         "develop": "cd static && wrangler pages dev ./ --compatibility-flags='nodejs_compat' --compatibility-date=2023-05-13",
         "publish": "cd static && wrangler pages publish ./ --project-name='chatgpt-wikipedia-plugin'"
     },
-    "author": "Techurbanist",
+    "author": "B. Barlow",
     "license": "MIT",
     "devDependencies": {
         "@babel/core": "^7.21.8",
