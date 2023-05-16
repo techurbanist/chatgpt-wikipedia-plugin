@@ -1,8 +1,8 @@
-# Wikipedia ChatGPT Plugin
+# Wiki Facts Plugin
 
 A plugin for ChatGPT which fetches the latest information on a specific topic from Wikipedia. 
 
-The plugin will retrieve the Wikipedia page by title, index the content on the page for full text search and then return the top n paragraphs that match the search terms.
+The plugin will retrieve a Wikipedia page by title, split the content on the page and then return the top n paragraphs that match the search terms.
 
 The plugin consists of:
 * The plugin manifest and OpenAPI spec as required for all ChatGPT plugins
@@ -15,6 +15,8 @@ The plugin API is described in the `.well-known/openai.yaml` OpenAPI spec. The f
 https://example.com/query/[page_title]/["search","terms"]
 ```
 Where the `page_title` is the Wikipedia page title and the `search terms` are the words to find in the Wikipedia page.
+
+Wikipedia is a trademark of the Wikimedia Foundation. We are not endorsed by or affiliated with the Wikimedia Foundation.
 
 
 ## Development

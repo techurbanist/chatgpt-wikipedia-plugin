@@ -1,5 +1,5 @@
 {
-    "name": "chatgpt-wikipedia-plugin",
+    "name": "chatgpt-wiki-facts-plugin",
     "version": "1.0.0",
     "description": "Get up-to-date information about a topic from Wikipedia",
     "scripts": {

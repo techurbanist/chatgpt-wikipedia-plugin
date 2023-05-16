@@ -67,7 +67,7 @@ export async function fetchWikipediaPage(decodedTopic){
     data = await response.json();
   } catch (e) {
     if (LOGGING) console.log(e);
-    return new Response("Error querying Wikipedia", {status: 503, statusText: "Wikipedia Unavailable" });
+    return new Response("Error querying the Wikipedia API", {status: 503, statusText: "Wikipedia Unavailable" });
   }
 
   const pageId = Object.keys(data.query.pages)[0];

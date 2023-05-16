@@ -1,7 +1,7 @@
 {
     "schema_version": "v1",
-    "name_for_human": "Wikipedia",
-    "name_for_model": "Wikipedia",
+    "name_for_human": "Wiki Facts",
+    "name_for_model": "WikiFacts",
     "description_for_human": "Get up-to-date information about a topic from Wikipedia.",
     "description_for_model": "Fetches the latest information on a specific topic from Wikipedia. To use it, supply the title of the Wikipedia page and up to four search terms. The tool will then retrieve up to five paragraphs from the specified page that include any of the provided search terms.",
     "auth": {
@@ -12,7 +12,7 @@
         "url": "https://chatgpt-wikipedia-plugin.cloudmesh.me/.well-known/openapi.yaml",
         "is_user_authenticated": false
     },
-    "logo_url": "https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png",
+    "logo_url": "https://chatgpt-wikipedia-plugin.cloudmesh.me/Wiki_Facts_Logo2.png",
     "contact_email": "cloudmesh.me+pluginsupport@gmail.com",
     "legal_info_url": "https://chatgpt-wikipedia-plugin.cloudmesh.me/legal"
 }

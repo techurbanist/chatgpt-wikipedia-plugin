@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Wikipedia 
+  title: Wiki Facts 
   description: Get snippets of content from Wikipedia by searching for specific terms within a Wikipedia page.
   version: 'v1'
 servers:
