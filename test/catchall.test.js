@@ -1,6 +1,15 @@
 import * as MUT from '../static/functions/query/[[catchall]].js';
 
 describe('[[catchall]].js', () => {
+
+  beforeEach(() => {
+    global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('extractArgs', () => {
     it('should extract arguments from context', () => {
       const context = {
@@ -40,6 +49,28 @@ describe('[[catchall]].js', () => {
 
       const result = await MUT.fetchWikipediaPage('topic');
       expect(result).toEqual('page text');
+    });
+
+    it('should throw error when fetch fails', async () => {
+      global.fetch = jest.fn(() => Promise.reject());
+      await expect(MUT.fetchWikipediaPage('topic')).rejects.toEqual({
+        message: "Error querying the Wikipedia API",
+        status: 503,
+        statusText: "Wikipedia Unavailable"
+      });
+    });
+
+    it('should throw error when page is not found', async () => {
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({
+            query: {
+              pages: {}
+            }
+          })
+        })
+      );
+      await expect(MUT.fetchWikipediaPage('topic')).rejects.toThrow();
     });
   });
 

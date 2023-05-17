@@ -7,16 +7,20 @@ const LOGGING = false;
  * Request handler for Cloudflare Pages Functions
  */
 export async function onRequest(context) {
-  const {decodedTopic, decodedQueries} = extractArgs(context);
-  const pageText = await fetchWikipediaPage(decodedTopic);
-  const paragraphs = splitPageToParagraphs(pageText);
-  const matchingParagraphs = getMatchingParagraphs(paragraphs, decodedQueries);
+  try {
+    const {decodedTopic, decodedQueries} = extractArgs(context);
+    const pageText = await fetchWikipediaPage(decodedTopic);
+    const paragraphs = splitPageToParagraphs(pageText);
+    const matchingParagraphs = getMatchingParagraphs(paragraphs, decodedQueries);
 
-  return new Response(JSON.stringify({matches: matchingParagraphs}), {
-    headers: {
-      "content-type": "application/json;charset=UTF-8",
-    }
-  });
+    return new Response(JSON.stringify({matches: matchingParagraphs}), {
+      headers: {
+        "content-type": "application/json;charset=UTF-8",
+      }
+    });
+  } catch (error) {
+    return new Response(error.message, {status: error.status, statusText: error.statusText});
+  }
 }
 
 
@@ -26,7 +30,7 @@ export function extractArgs(context) {
     ({ catchall: [topic, query] } = context.params);
   } catch (e) {
     if (LOGGING) console.log(e);
-    return new Response("Invalid page or searchTerms parameters in the URL", {status: 400, statusText: "Bad Request" });
+    throw {message: "Invalid page or searchTerms parameters in the URL", status: 400, statusText: "Bad Request"};
   }
 
   let decodedTopic, decodedQuery;
@@ -35,7 +39,7 @@ export function extractArgs(context) {
     decodedQuery = decodeURIComponent(query);
   } catch (e) {
     if (LOGGING) console.log(e);
-    return new Response("Invalid page or searchTerms parameters", {status: 400, statusText: "Bad Request" });
+    throw {message: "Invalid page or searchTerms parameters", status: 400, statusText: "Bad Request"};
   }
 
   let decodedQueries;
@@ -43,15 +47,15 @@ export function extractArgs(context) {
     decodedQueries = JSON.parse(decodedQuery)
   } catch (e) {
     if (LOGGING) console.log(e);
-    return new Response("searchTerms is not a valid stringified JSON array of search terms", {status: 400, statusText: "Bad Request" });
+    throw {message: "searchTerms is not a valid stringified JSON array of search terms", status: 400, statusText: "Bad Request"};
   }
 
   if (!Array.isArray(decodedQueries)) {
-    return new Response("searchTerms is not an array", {status: 400, statusText: "Bad Request" });
+    throw {message: "searchTerms is not an array", status: 400, statusText: "Bad Request"};
   }
 
   if (decodedQueries.length > MAX_SEARCH_TERMS) {
-    return new Response(MAX_SEARCH_TERMS + " searchTerms exceeded in array", {status: 400, statusText: "Bad Request" });
+    throw {message: MAX_SEARCH_TERMS + " searchTerms exceeded in array", status: 400, statusText: "Bad Request"};
   }
 
   if(LOGGING) console.log(`Searching for ${decodedQuery} in ${decodedTopic}`);
@@ -67,14 +71,16 @@ export async function fetchWikipediaPage(decodedTopic){
     data = await response.json();
   } catch (e) {
     if (LOGGING) console.log(e);
-    return new Response("Error querying the Wikipedia API", {status: 503, statusText: "Wikipedia Unavailable" });
+    throw {message: "Error querying the Wikipedia API", status: 503, statusText: "Wikipedia Unavailable"};
   }
 
   const pageId = Object.keys(data.query.pages)[0];
   const pageText = data.query.pages[pageId].extract;
 
+  if (LOGGING) console.log(`Page text is ${pageText}`);
+
   if (pageText === undefined) {
-    return new Response("Page not found on Wikipedia", {status: 404, statusText: "Page not found" });
+    throw {message: `Page with title '${decodedTopic}' was not found on Wikipedia`, status: 404, statusText: "Page not found"};
   }
   return pageText;
 }
