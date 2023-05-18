@@ -80,7 +80,7 @@ export async function fetchWikipediaPage(decodedTopic){
   if (LOGGING) console.log(`Page text is ${pageText}`);
 
   if (pageText === undefined) {
-    throw {message: `Page with title '${decodedTopic}' was not found on Wikipedia`, status: 404, statusText: "Page not found"};
+    throw {message: `Page with title '${decodedTopic}' was not found on Wikipedia. Check that you used title case or try another title.`, status: 404, statusText: "Page not found"};
   }
   return pageText;
 }
