@@ -35,6 +35,9 @@ components:
     getQueryResultsResponse:
       type: object
       properties:
+        pageUrl:
+          type: string
+          description: The URL of the wikipedia page.
         matches:
           type: array
           items:

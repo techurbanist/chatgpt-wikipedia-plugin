@@ -13,7 +13,10 @@ export async function onRequest(context) {
     const paragraphs = splitPageToParagraphs(pageText);
     const matchingParagraphs = getMatchingParagraphs(paragraphs, decodedQueries);
 
-    return new Response(JSON.stringify({matches: matchingParagraphs}), {
+    const encodedTitle = encodeURIComponent(decodedTopic);
+    const url = `https://en.wikipedia.org/wiki/${encodedTitle}`;
+
+    return new Response(JSON.stringify({pageUrl: url, matches: matchingParagraphs}), {
       headers: {
         "content-type": "application/json;charset=UTF-8",
       }
